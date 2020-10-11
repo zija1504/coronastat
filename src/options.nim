@@ -12,48 +12,48 @@ type
 
 var
   options*: seq[Option]
-  country* = ""
+  countryInput* = ""
   showNew* = false
   showLastUpdate* = false
 
-proc GetOptionLength(option: Option): int =
-  return (option.short & ", " & option.long).len()
+proc getOptionLength(option: Option): int =
+  return option.short.len + option.long.len
 
-proc GetLongestOption(): int =
+proc getLongestOption(): int =
   result = 0
   for option in options:
-    let len = GetOptionLength(option)
+    let len = getOptionLength(option)
     if len > result:
       result = len
 
-proc PrintVersion() =
+proc printVersion() =
   echo &"Coronastat Version {version}"
   echo &"Compiled at {CompileDate} {CompileTime}"
   echo &"Author: {author}"
 
-proc VersionCallback(val: string) =
-  PrintVersion()
+proc versionCallback(val: string) =
+  printVersion()
   quit()
 
-proc HelpCallback(val: string) =
-  PrintVersion()
+proc helpCallback(val: string) =
+  printVersion()
   echo "\nOptions:"
 
   for option in options:
     stdout.write(&"\t-{option.short}, --{option.long}")
     
-    let descPos = GetLongestOption() + 4
-    let diff = descPos - GetOptionLength(option)
+    let descPos = getLongestOption() + 4
+    let diff = descPos - getOptionLength(option)
 
     stdout.write(' '.repeat(diff))
     echo option.description
 
   quit()
 
-proc Parse*() =
-  options.add Option(long: "version", short: "v", description: "shows version info", callback: VersionCallback)
-  options.add Option(long: "help", short: "h", description: "shows help", callback: HelpCallback)
-  options.add Option(long: "country", short: "c", description: "set country(if set to all -> shows information about all countries)", callback: (proc (val: string) = country = val))
+proc parseCommandLine*() =
+  options.add Option(long: "version", short: "v", description: "shows version info", callback: versionCallback)
+  options.add Option(long: "help", short: "h", description: "shows help", callback: helpCallback)
+  options.add Option(long: "country", short: "c", description: "set country(if set to all -> shows information about all countries)", callback: (proc (val: string) = countryInput = val))
   options.add Option(long: "new", short: "n", description: "shows new data(only works if a country is specified)", callback: (proc (val: string) = showNew = true))
   options.add Option(long: "lastupdate", short: "l", description: "shows when was the last update(only works if a country is not specified)", callback: (proc (val: string) = showLastUpdate = true))
 
