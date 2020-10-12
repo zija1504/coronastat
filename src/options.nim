@@ -12,7 +12,8 @@ type
 
 var
   options*: seq[Option]
-  countryInput* = ""
+  countryInput* = "none"
+  continentInput* = "none"
   showNew* = false
   showLastUpdate* = false
 
@@ -54,6 +55,7 @@ proc parseCommandLine*() =
   options.add Option(long: "version", short: "v", description: "shows version info", callback: versionCallback)
   options.add Option(long: "help", short: "h", description: "shows help", callback: helpCallback)
   options.add Option(long: "country", short: "c", description: "set country(if set to all -> shows information about all countries)", callback: (proc (val: string) = countryInput = val))
+  options.add Option(long: "continent", short: "k", description: "set continent(if set to all -> shows information about all countries)", callback: (proc (val: string) = continentInput = val))
   options.add Option(long: "new", short: "n", description: "shows new data(only works if a country is specified)", callback: (proc (val: string) = showNew = true))
   options.add Option(long: "lastupdate", short: "l", description: "shows when was the last update(only works if a country is not specified)", callback: (proc (val: string) = showLastUpdate = true))
 
