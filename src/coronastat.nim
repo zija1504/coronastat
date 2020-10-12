@@ -23,7 +23,7 @@ proc world(): string =
 
     result &= fmt" ; last updated: {lastUpdated}"
 
-proc country(): string =
+proc countryOrContinent(): string =
   cases = node["cases"].getInt()
   deaths = node["deaths"].getInt()
   recovered = node["recovered"].getInt()
@@ -37,11 +37,11 @@ proc country(): string =
 
     result &= fmt" ; new cases: {newCases} ; new deaths: {newDeaths}"
 
-proc allCountries() =
+proc allCountriesOrContinents(coc: string) =
   var 
-    countries: seq[seq[string]]
-    countryIdx = 1
-    headers = @["", "country", "cases", "deaths", "recovered"]
+    counOrCont: seq[seq[string]]
+    idx = 1
+    headers = @["", coc, "cases", "deaths", "recovered"]
 
   if showNew:
     headers.add "new cases"
@@ -49,8 +49,8 @@ proc allCountries() =
 
   for item in node.items:
     var row: seq[string]
-    row.add intToStr(countryIdx)
-    row.add unidecode(item["country"].getStr)
+    row.add intToStr(idx)
+    row.add unidecode(item[coc].getStr)
     row.add intToStr(item["cases"].getInt)
     row.add intToStr(item["deaths"].getInt)
     row.add intToStr(item["recovered"].getInt)
@@ -59,23 +59,34 @@ proc allCountries() =
       row.add intToStr(item["todayCases"].getInt)
       row.add intToStr(item["todayDeaths"].getInt)
 
-    countries.add row
-    inc countryIdx
+    counOrCont.add row
+    inc idx
 
-  printTable(headers, countries)
+  printTable(headers, counOrCont)
 
 parseCommandLine()
 
 case countryInput:
-  of "":
-    let data = client.getContent(requestURL & "all")
-    node = parseJson(data)
-    echo world()
+  of "none":
+    case continentInput:
+      of "none":
+        let data = client.getContent(requestURL & "all")
+        node = parseJson(data)
+        echo world()
+      of "all":
+        let data = client.getContent(requestURL & "continents")
+        node = parseJson(data)
+        allCountriesOrContinents("continent")
+      else:
+        let data = client.getContent(requestURL & "continents/" & continentInput)
+        node = parseJson(data)
+        echo countryOrContinent()
+
   of "all":
     let data = client.getContent(requestURL & "countries")
     node = parseJson(data)
-    allCountries()
+    allCountriesOrContinents("country")
   else:
     let data = client.getContent(requestURL & "countries/" & countryInput)
     node = parseJson(data)
-    echo country()
+    echo countryOrContinent()
